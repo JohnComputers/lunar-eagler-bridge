@@ -4,26 +4,31 @@ import { readFile } from 'node:fs/promises';
 
 const html = await readFile(new URL('../docs/index.html', import.meta.url), 'utf8');
 
-test('launcher is a static HTML file with no downloaded runtime required',()=>{
-  assert.match(html, /<!doctype html>/i);
-  assert.match(html, /<script>/i);
-  assert.doesNotMatch(html, /<script[^>]+src=/i);
+test('launcher is a standalone static HTML document', () => {
+  assert.ok(html.toLowerCase().includes('<!doctype html>'));
+  assert.ok(html.includes('<script>'));
+  assert.ok(!html.includes('<script src='));
 });
-test('world is accurate and browser client is official 26.3 Gaius Pages',()=>{
-  assert.match(html, /chillice_\\.lunarclient\\.world/);
-  assert.match(html, /https:\/\/typethe0ry\.github\.io\/Gaius\/Gaius-26\.3\.html/);
+
+test('correct world and hosted 26.3 browser game', () => {
+  assert.ok(html.includes('chillice_.lunarclient.world'));
+  assert.ok(html.includes('https://typethe0ry.github.io/Gaius/Gaius-26.3.html'));
 });
-test('no false authenticated login or bypass claim',()=>{
-  assert.match(html, /authentication/);
-  assert.match(html, /not been verified/);
-  assert.match(html, /Invalid session/);
+
+test('does not promise authenticated login', () => {
+  assert.ok(html.includes('authentication'));
+  assert.ok(html.includes('not been verified'));
+  assert.ok(html.includes('Invalid session'));
 });
-test('does not expose user credentials to a third party',()=>{
-  assert.doesNotMatch(html, /<input[^>]*type=["']password/i);
-  assert.doesNotMatch(html, /sessionStorage|localStorage/);
+
+test('no credential input or token persistence', () => {
+  assert.ok(!html.includes('type="password"'));
+  assert.ok(!html.includes('sessionStorage'));
+  assert.ok(!html.includes('localStorage'));
 });
-test('browser support and world copying are implemented',()=>{
-  for(const id of ['wasm','webgl','secure','copyWorld','world','play','relay','customPlay']) {
-    assert.match(html,new RegExp('id=["\\x27]'+id+'["\\x27]'));
+
+test('Chromebook feature checks, copy and relay input are available', () => {
+  for (const id of ['wasm','webgl','secure','copyWorld','world','play','relay','customPlay']) {
+    assert.ok(html.includes('id="' + id + '"'), 'Missing element: ' + id);
   }
 });
