@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: lunar-gaius-relay
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile.gaius
+    autoDeployTrigger: off
+    healthCheckPath: /health
+    envVars:
+      - key: GAIUS_BRIDGE_HOST
+        value: 0.0.0.0
+      - key: GAIUS_BRIDGE_PORT
+        value: "10000"
+      - key: GAIUS_ALLOWED_ORIGINS
+        value: "https://typethe0ry.github.io,null"
+      - key: GAIUS_ALLOWED_HOSTS
+        value: "chillice_.lunarclient.world"
+      - key: GAIUS_ALLOW_PRIVATE_TARGETS
+        value: "0"
+      - key: GAIUS_MAXIMUM_CONNECTIONS
+        value: "12"
+      - key: GAIUS_RELAY_NODE_NAME
+        value: "Lunar Hosted World Relay"

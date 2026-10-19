@@ -1,69 +1,63 @@
-# Lunar ↔ Eagler Bridge (experimental)
+# Lunar → ChromeOS: browser-only Minecraft 26.3 entry point
 
-> **Not a working Eaglercraft 26.3 login solution yet.** This repository contains a functioning restricted [Wisp](https://github.com/MercuryWorkshop/wisp-protocol) transport server and Minecraft Java status probe. The missing Eaglercraft 26.3 **client-side Wisp integration and authenticated Java session** mean you cannot simply paste this relay's URL into the stock Eaglercraft multiplayer screen.
+**Live launcher:** https://johncomputers.github.io/lunar-eagler-bridge/  
+**Target world:** `chillice_.lunarclient.world`
 
-## Target and status
+> **Status:** The launcher is browser-only and works on ChromeOS without installing software. It opens the working [Gaius Java 26.3 browser client](https://typethe0ry.github.io/Gaius/Gaius-26.3.html), using its existing public RelayNode. **Actual authenticated gameplay on this specific Lunar Hosted World is not yet verified**. This is not a promise to bypass Minecraft authentication.
 
-| Item | Value |
-| --- | --- |
-| Target world | `chillice_.lunarclient.world` |
-| Client goal | Eaglercraft/Eagler26 26.3 in ChromeOS |
-| Java server status checker | Implemented |
-| Wisp TCP relay restricted to target | Implemented |
-| Custom server dashboard | Implemented |
-| Client-side 26.3 integration | **Not implemented** |
-| Microsoft/Minecraft authenticated login | **Not implemented** |
-| End-to-end joining Lunar Hosted Worlds | **Not verified** |
+## How to try it on a school Chromebook
 
-Eagler26 speaks the *Eaglercraft WebSocket login protocol* to servers with EaglerXServer; [Wisp](https://github.com/MercuryWorkshop/wisp-js) carries arbitrary TCP streams inside WebSockets. They are **different protocols**. A plain Wisp server is not a substitute for EaglerXServer, and the URL `wss://your-host/wisp/` is **not** directly usable in stock Eaglercraft.
+1. Open [the Chromebook launcher](https://johncomputers.github.io/lunar-eagler-bridge/) in Chrome.
+2. Run capability checks (WebGL 2 / WebAssembly / HTTPS).
+3. Click **Play Minecraft 26.3**. This opens the existing Java 26.3 client directly in Chrome, without downloads or executables.
+4. Choose **Multiplayer → Direct Connection**.
+5. Paste `chillice_.lunarclient.world`; no `wss://` prefix.
+6. Ask the host to set Lunar Hosted World's **Privacy = Everyone**, keep the world open, and ensure the world runs the same Minecraft version.
 
-## Local run (computer or VPS, not GitHub Pages)
+Gaius supports unmodified Java servers through a relay; no plugin is required on the owner's computer. The default registry currently lists `wss://ellan.site/tunnel`. It is a community service, may become unavailable, and may not accept every domain or session. [Gaius project](https://github.com/TypeThe0ry/Gaius) and [relay registry](https://github.com/TypeThe0ry/Gaius/blob/main/relay-nodes.json).
 
-Requires Node 20+:
+**Authentication matters:** Most Java multiplayer worlds use online-mode account verification. Gaius's offline profile is not equivalent to an authenticated Microsoft/Minecraft Java session. An **Invalid Session**, **Failed to verify username** or similar error means the relay transport alone cannot make the client join. Joining this specific world requires compatible authentication and permission from the server, not just a WebSocket bridge. We have not confirmed the exact world's authentication policy or that it is currently online.
 
-```bash
-npm install
-npm test
-npm start
-```
+If the host is on a different Java version, the client version must match; this launcher defaults to 26.3 because that is the user's browser version, **not because we verified the Lunar world runs 26.3**.
 
-Open http://127.0.0.1:3000. The dashboard shows a live Java server status check.
+## What's inside
 
-```bash
-npm run check
-```
+- `docs/index.html` — standalone Chromebook-friendly HTML launcher, world address copier, browser capability tests, optional public Java status lookup, and Gaius browser link.
+- `Dockerfile.gaius` — builds a restricted Gaius RelayNode using [Gaius v0.3.2](https://github.com/TypeThe0ry/Gaius/releases/tag/v0.3.2).
+- `render.yaml` — optional Render blueprint to host the relay behind HTTPS; no process runs on the Chromebook.
+- `server.mjs` — the original **Wisp** relay. **Wisp is NOT the Gaius transport and cannot be pasted as a Gaius relay URL.** This older proof of concept is preserved for comparison only.
+- `lib/minecraft-status.mjs` and `check.mjs` — direct Java server-status implementation for Node hosts.
+- `test/` — packet tests and static browser launcher tests.
 
-Checks the target from the server's network, including Java DNS SRV discovery. It does **not** authenticate or join the world.
+## Optional private relay deployment
 
-Environment variables: `HOST` (default `127.0.0.1`) and `PORT` (default `3000`). A Dockerfile is provided:
+The public Gaius relay usually means nothing has to be deployed. If needed, [deploy a Node.js service from this repository to Render](https://render.com/deploy?repo=https://github.com/JohnComputers/lunar-eagler-bridge) (requires your own Render account). The relay runs **in Render's cloud**, not on ChromeOS. The Dockerfile starts the actual upstream Gaius RelayNode rather than an incompatible Wisp server.
 
-```bash
-docker build -t lunar-eagler-bridge .
-docker run --rm -p 3000:3000 lunar-eagler-bridge
-```
+When the service is live, get its HTTPS URL, then convert it to `wss://YOUR-RENDER-SERVICE.onrender.com/tunnel`. On the launcher page, enter that address under **Optional: bring your own relay**, then click **Open with selected relay**. Alternatively, use Gaius Multiplayer → Relays.
 
-To use from a Chromebook, deploy the **Node service** on a web host with HTTP WebSocket upgrades and TLS (HTTPS/WSS). The normal `github.io` GitHub Pages service **cannot** run Node servers or accept WebSocket connections. Use a domain or platform-provided HTTPS URL, then the Wisp endpoint is `wss://YOUR-DEPLOYED-HOST/wisp/`.
+Render free services can sleep, have quotas, or be unavailable; costs and availability can change. There is no deployment without authorization to your hosting account.
 
 ### Security
 
-The Wisp server is locked to `chillice_.lunarclient.world:25565`, with direct IP requests, loopback/private address targets, and UDP disabled. It is not intended for unrestricted traffic or school network bypass. Do not disable those restrictions when hosting a public endpoint. The Java server's Minecraft status check uses DNS SRV if present, but **Wisp traffic does not automatically follow SRV**, so a world using a nondefault port or an unusual SRV mapping may require additional trusted routing work.
+The Render blueprint restricts target hosts to `chillice_.lunarclient.world`, disallows private destinations, restricts browser origins to the Gaius host and downloaded local HTML, and limits active sockets. A public relay still consumes hosting resources. Don't enter Minecraft account passwords in this repo's launcher. The relay does not generate Minecraft Java ownership or valid authentication tokens.
 
-### What is required for gameplay?
+DNS SRV records may point at a different hostname/port than the default Java 25565. Upstream RelayNode is SRV-aware but destination restrictions must still permit an authorized target. If it reports target blocked, verify DNS and adjust only to the specific legitimate target; never turn it into an unrestricted proxy.
 
-1. World owner opens Lunar Client Hosted Worlds and sets **World Privacy → Everyone**, then keeps their world open. [Lunar's instructions](https://www.lunarclient.com/news/how-to-use-hosted-worlds-on-lunar-client).
-2. Adapt the Eagler26 26.3 client network stack to send/receive Java TCP packets through Wisp. An older proof of concept is [Wispcraft](https://github.com/MercuryWorkshop/wispcraft); it is **not confirmed compatible with 26.3**.
-3. Properly handle the target's Minecraft version and Microsoft/Minecraft account authentication. No authentication bypass, account token harvesting, or password submission is implemented.
-4. Test that the Lunar Hosted World accepts the resulting account and protocol, including any player limits and SRV/port handling.
+## Troubleshooting
 
-If the host permits Bedrock players, a **legitimate Bedrock client** can instead use Lunar's published Bedrock port **19132**. An ordinary Eaglercraft browser client is **not** automatically a Bedrock client.
+| Symptom | Meaning |
+|---|---|
+| Chrome cannot load Gaius | Site/network blocked; check school policy and browser access |
+| WebGL 2 unavailable | Chromebook graphics/browser limitation |
+| Gaius multiplayer waits indefinitely | Public relay down, destination blocked, DNS routing, or version mismatch |
+| Invalid session / Failed to verify username | Account authentication required; relay cannot bypass |
+| Disconnected: Outdated client/server | Lunar world and client versions do not match |
+| Server offline | Host must reopen their Lunar world and set Privacy to Everyone |
+| Entering `wss://…` as game server | Incorrect; enter the Java world address without a WebSocket scheme |
+| Using `/wisp/` URL in Gaius | Incorrect protocol; use Gaius RelayNode's `/tunnel` |
 
-### Reference implementations
+## Project boundaries
 
-- [Eagler26 attribution / network protocol](https://client.goldhq.net/attribution)
-- [Wispcraft (browser-to-Java research)](https://github.com/MercuryWorkshop/wispcraft)
-- [Mercury Workshop Wisp JS](https://github.com/MercuryWorkshop/wisp-js)
-- [Lunar Hosted Worlds](https://www.lunarclient.com/news/how-to-use-hosted-worlds-on-lunar-client)
+This repository does not host or redistribute Mojang game binaries, credentials, or the Gaius build. The browser client is linked from the original upstream project. This tool neither weakens school administrator controls nor impersonates Minecraft accounts.
 
-## Legal
-
-Does not distribute Minecraft game files, account credentials, proprietary assets, or a patched game client. Independent community experiment, unaffiliated with all upstream projects.
+Independent project. Not affiliated with Lunar Client, Minecraft, Mojang, Microsoft, Eaglercraft, Gaius or Mercury Workshop.

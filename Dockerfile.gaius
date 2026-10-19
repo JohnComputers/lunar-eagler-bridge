@@ -1,0 +1,16 @@
+# Runs the upstream Gaius RelayNode. It is server-side only;
+# nothing is installed or executed on the Chromebook.
+# v0.3.2 is the tested release currently hosted on Gaius GitHub Pages.
+FROM alpine/git:2.47.2 AS source
+RUN git clone --depth 1 --branch v0.3.2 https://github.com/TypeThe0ry/Gaius.git /src
+
+FROM node:24-alpine
+WORKDIR /app
+COPY --from=source /src/apps/bridge/package.json /src/apps/bridge/package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+COPY --from=source /src/apps/bridge/dist ./dist
+ENV NODE_ENV=production
+ENV GAIUS_BRIDGE_HOST=0.0.0.0
+ENV GAIUS_BRIDGE_PORT=10000
+EXPOSE 10000
+CMD ["node", "dist/main.js"]
