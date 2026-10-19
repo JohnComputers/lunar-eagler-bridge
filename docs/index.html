@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0a1220">
-<title>Lunar World • ChromeOS Join Assistant</title>
+<title>Lunar World • Windows 11 & Chromebook Browser Launcher</title>
 <style>
 :root{font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#ecf4ff;color-scheme:dark;background:#080f1c}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% -10%,#16355b 0,transparent 48%),#080f1c}
@@ -28,6 +28,11 @@ input{width:100%;padding:11px 12px;border:1px solid #53657f;border-radius:9px;ba
 label{font-weight:650;display:block;margin-bottom:8px}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .check{background:#182c43;border-radius:12px;padding:12px;font-size:.87rem}
+.guide{border:1px solid #344c68;border-radius:14px;padding:17px;background:#142741}
+.guide h3{font-size:1rem;margin:0 0 8px}
+.guide p{font-size:.92rem;margin:0}
+.guide.selected{border-color:#7ee7c3;box-shadow:0 0 0 1px #7ee7c3}
+#detectedPlatform{font-weight:700;color:#7ee7c3}
 .status{font-weight:750;color:#7ee7c3}
 .warning{border-left:3px solid #eaba72;padding:3px 0 3px 14px;color:#e7d3b7}
 ol{padding-left:25px}li{color:#bdcfe4;line-height:1.65;margin:7px 0}
@@ -38,9 +43,9 @@ a{color:#9bf5d9}footer{font-size:.86rem;color:#8fa3be;margin-top:28px}
 </head>
 <body>
 <main>
-<div class="eyebrow">ChromeOS · No executables · Java 26.3</div>
-<h1>Connect from a school Chromebook.</h1>
-<p class="lead">A browser-only entry point for the Lunar Hosted World owned by <strong>chillice_</strong>. Uses the existing Gaius Minecraft Java 26.3 browser client, not a misleading Eaglercraft WebSocket address.</p>
+<div class="eyebrow">Windows 11 + ChromeOS · Browser only · No .exe · Java 26.3</div>
+<h1>Connect from a Chromebook or Windows 11 laptop.</h1>
+<p class="lead">A browser-only entry point for the Lunar Hosted World owned by <strong>chillice_</strong>. Open in Chrome on a Chromebook, or Microsoft Edge / Chrome on Windows 11. No .exe files, launchers, extensions, or local servers required.</p>
 <div class="two">
 <section class="card">
 <h2>World address</h2>
@@ -50,18 +55,33 @@ a{color:#9bf5d9}footer{font-size:.86rem;color:#8fa3be;margin-top:28px}
 </section>
 <section class="card">
 <h2>Browser client</h2>
-<p><strong>Gaius 26.3</strong> — a Java 26.3 client implemented for Chromium. Opens in another tab; no launcher or executable required on the Chromebook.</p>
+<p><strong>Gaius 26.3</strong> — a Java 26.3 browser client for Chromium. Opens in a new tab on Windows 11 or ChromeOS; the game does not require installing or running a separate Minecraft executable.</p>
 <div class="actions"><a class="button" target="_blank" rel="noopener noreferrer" id="play" href="https://typethe0ry.github.io/Gaius/Gaius-26.3.html">Play Minecraft 26.3 ↗</a></div>
 </section>
 </div>
 <section class="card">
-<h2>Chromebook capability checks</h2>
+<h2>Browser capability checks</h2>
 <p class="sub">These checks confirm browser capabilities only, not permission to connect to Lunar.</p>
 <div class="grid">
 <div class="check">WebAssembly<br><span id="wasm" class="status">Checking</span></div>
 <div class="check">WebGL 2<br><span id="webgl" class="status">Checking</span></div>
 <div class="check">HTTPS / secure context<br><span id="secure" class="status">Checking</span></div>
 </div>
+</section>
+<section class="card">
+<h2>Choose your device</h2>
+<p>Detected platform: <span id="detectedPlatform" aria-live="polite">Checking…</span>. Both devices use the exact same game and server address.</p>
+<div class="two">
+<div class="guide" id="windowsGuide">
+<h3>Windows 11</h3>
+<p>Open this page in <strong>Microsoft Edge</strong> (already on Windows 11) or Chrome. Click <strong>Play Minecraft 26.3</strong> above, then use Multiplayer → Direct Connection. Nothing to download or run as a .exe.</p>
+</div>
+<div class="guide" id="chromebookGuide">
+<h3>School Chromebook</h3>
+<p>Open this page in <strong>Chrome</strong>. Click <strong>Play Minecraft 26.3</strong> above and join via Multiplayer → Direct Connection. No Linux environment, Android app, or executable is needed.</p>
+</div>
+</div>
+<p class="sub">Browser gameplay still requires WebGL 2, WebAssembly and network access. Managed browsers or school policies can restrict sites; this project does not circumvent those restrictions.</p>
 </section>
 <section class="card">
 <h2>Try the Lunar world</h2>
@@ -75,7 +95,7 @@ a{color:#9bf5d9}footer{font-size:.86rem;color:#8fa3be;margin-top:28px}
 </section>
 <section class="card">
 <h2>Optional: bring your own relay</h2>
-<p>Gaius has a public relay already. If it becomes unavailable or you want a restricted relay, deploy the <a href="https://github.com/JohnComputers/lunar-eagler-bridge#optional-private-relay-deployment" target="_blank" rel="noopener noreferrer">relay in this repository</a> to a Node-compatible HTTPS host. This does not require software on the Chromebook.</p>
+<p>Gaius has a public relay already. If it becomes unavailable or you want a restricted relay, deploy the <a href="https://github.com/JohnComputers/lunar-eagler-bridge#optional-private-relay-deployment" target="_blank" rel="noopener noreferrer">relay in this repository</a> to a Node-compatible HTTPS host. This does not require software on the Chromebook or Windows 11 laptop.</p>
 <label for="relay">Your WSS relay URL (optional)</label>
 <input type="url" id="relay" inputmode="url" placeholder="wss://your-host.example/tunnel" autocomplete="off" spellcheck="false">
 <p id="relayHelp" class="sub">Leave empty to use Gaius's public relay. This field does not add Microsoft login support.</p>
@@ -100,6 +120,13 @@ try{
   $("webgl").textContent=canvas.getContext("webgl2")?"Available":"Unavailable";
 }catch { $("webgl").textContent="Unavailable"; }
 $("secure").textContent=window.isSecureContext?"Available":"Unavailable";
+const userAgent=navigator.userAgent||"";
+const reportedPlatform=navigator.userAgentData?.platform||navigator.platform||"";
+const isChromeOS=/CrOS/i.test(userAgent)||/Chrome OS/i.test(reportedPlatform);
+const isWindows=!isChromeOS&&(/Win/i.test(reportedPlatform)||/Windows NT/i.test(userAgent));
+$("detectedPlatform").textContent=isChromeOS?"Chromebook / ChromeOS":isWindows?"Windows laptop (Windows 11 supported)":"Other / not identified";
+if(isChromeOS)$("chromebookGuide").classList.add("selected");
+if(isWindows)$("windowsGuide").classList.add("selected");
 $("copyWorld").addEventListener("click",async()=>{
   try{
     await navigator.clipboard.writeText(WORLD);

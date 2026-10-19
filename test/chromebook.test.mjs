@@ -27,8 +27,21 @@ test('no credential input or token persistence', () => {
   assert.ok(!html.includes('localStorage'));
 });
 
-test('Chromebook feature checks, copy and relay input are available', () => {
+test('Windows 11 and ChromeOS feature checks, copy and relay input are available', () => {
   for (const id of ['wasm','webgl','secure','copyWorld','world','play','relay','customPlay']) {
     assert.ok(html.includes('id="' + id + '"'), 'Missing element: ' + id);
   }
+});
+
+test('both laptop platforms are supported without separate executables', () => {
+  assert.ok(html.includes('Windows 11'));
+  assert.ok(html.includes('Microsoft Edge'));
+  assert.ok(html.includes('ChromeOS'));
+  assert.ok(html.includes('id="windowsGuide"'));
+  assert.ok(html.includes('id="chromebookGuide"'));
+  assert.ok(html.includes('id="detectedPlatform"'));
+  assert.ok(html.includes('No .exe'));
+  assert.ok(html.includes('navigator.userAgent'));
+  assert.ok(html.includes('isChromeOS'));
+  assert.ok(html.includes('isWindows'));
 });
