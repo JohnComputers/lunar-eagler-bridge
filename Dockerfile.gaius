@@ -9,6 +9,9 @@ WORKDIR /app
 COPY --from=source /src/apps/bridge/package.json /src/apps/bridge/package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund
 COPY --from=source /src/apps/bridge/dist ./dist
+# Permit only the exact Lunar Hosted World hostname with an underscore.
+# Keep the upstream DNS validator unchanged for every other destination.
+RUN node -e 'const fs=require("node:fs");const p="dist/policy.js";let s=fs.readFileSync(p,"utf8");const a="if (host.length === 0 || (isIP(host) === 0 && !isValidDnsName(host))) {";const b="if (host.length === 0 || (host !== \"chillice_.lunarclient.world\" && isIP(host) === 0 && !isValidDnsName(host))) {";if(!s.includes(a))throw Error("Upstream policy changed; refusing unsafe patch");fs.writeFileSync(p,s.replace(a,b));'
 ENV NODE_ENV=production
 ENV GAIUS_BRIDGE_HOST=0.0.0.0
 ENV GAIUS_BRIDGE_PORT=10000
