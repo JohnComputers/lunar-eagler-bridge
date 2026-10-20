@@ -14,10 +14,10 @@ services:
       - key: GAIUS_ALLOWED_ORIGINS
         value: "https://typethe0ry.github.io,null"
       - key: GAIUS_ALLOWED_HOSTS
-        value: "chillice_.lunarclient.world"
+        value: "*"
       - key: GAIUS_ALLOW_PRIVATE_TARGETS
         value: "0"
       - key: GAIUS_MAXIMUM_CONNECTIONS
-        value: "12"
+        value: "4"
       - key: GAIUS_RELAY_NODE_NAME
-        value: "Lunar Hosted World Relay"
+        value: "Gaius Java Multiplayer Relay"
